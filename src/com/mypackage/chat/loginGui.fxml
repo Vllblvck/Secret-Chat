@@ -9,7 +9,7 @@
 <?import javafx.scene.text.Font?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0"
             prefWidth="400.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.mypackage.chat.Controller">
+            fx:controller="com.mypackage.chat.LoginController">
     <children>
         <PasswordField fx:id="password" layoutX="126.0" layoutY="110.0" promptText="password"/>
         <TextField fx:id="login" layoutX="126.0" layoutY="75.0" promptText="login"/>

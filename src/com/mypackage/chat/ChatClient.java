@@ -8,37 +8,40 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ChatClient {
-    private final int SERVER_PORT = 5000;
-    private Scanner scanner = new Scanner(System.in);
-    private Socket socket;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
-    private AtomicBoolean sendMsgIsRunning = new AtomicBoolean(false);
-    private AtomicBoolean readMsgIsRunning = new AtomicBoolean(false);
-    private String username;
-    private String usersOnline;
+    private static final int SERVER_PORT = 5000;
+    protected static String username;
+    protected static String usersOnline;
+    private static Socket socket;
+    private static DataInputStream inputStream;
+    private static DataOutputStream outputStream;
+    private static Scanner scanner = new Scanner(System.in);
+    private static AtomicBoolean sendMsgIsRunning = new AtomicBoolean(false);
+    private static AtomicBoolean readMsgIsRunning = new AtomicBoolean(false);
 
-    public ChatClient() {
+    private ChatClient() {
+    }
+
+    public static void connectToServer() {
         try {
             socket = new Socket("127.0.0.1", SERVER_PORT);
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getOutputStream());
-            //sendingMsg();
-            //readingMsg();
         } catch (IOException e) {
-            //TODO add label about that
             System.out.println("Server is not running");
+            //TODO add label about that
         }
     }
 
-    /*@Override
-    public void run() {
-        //getUsersOnline()
-        //sengingMsg.start
-        //readingMsg.start
-    }*/
+    public static void readUsersOnline() {
+        try {
+            usersOnline = inputStream.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void sendingMsg() {
+
+    public static void sendingMsg() {
         Thread sendMsg = new Thread(() -> {
             while (sendMsgIsRunning.get()) {
                 String msg = scanner.nextLine();
@@ -54,7 +57,7 @@ public class ChatClient {
         sendMsg.start();
     }
 
-    public void readingMsg() {
+    public static void readingMsg() {
         Thread readMsg = new Thread(() -> {
             while (readMsgIsRunning.get()) {
                 try {
@@ -70,7 +73,7 @@ public class ChatClient {
         readMsg.start();
     }
 
-    public boolean login(String login, String password) throws IOException {
+    public static boolean login(String login, String password) throws IOException {
         outputStream.writeUTF(login + "|" + password);
         if (inputStream.readUTF().equals("logged in")) {
             username = inputStream.readUTF();
@@ -80,17 +83,17 @@ public class ChatClient {
         return false;
     }
 
-    public void close() throws IOException {
-        outputStream.close();
-        inputStream.close();
-        socket.close();
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getUsersOnline() {
-        return usersOnline;
+    public static void close() {
+        try {
+            if (outputStream != null)
+                outputStream.close();
+            if (inputStream != null)
+                inputStream.close();
+            if (socket != null)
+                socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Could not close streams and socket from client side");
+        }
     }
 }
