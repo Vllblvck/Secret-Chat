@@ -22,10 +22,11 @@ public class ChatController implements Initializable {
     public void updateGUI() {
         Platform.runLater(() -> {
             StringTokenizer tokenizer = new StringTokenizer(ChatClient.usersOnline, "\n");
-            usersCounter.setText(Integer.toString(tokenizer.countTokens()));
+            usersCounter.setText(Integer.toString(tokenizer.countTokens() - 1));
             usersOnline.getItems().clear();
             while (tokenizer.hasMoreTokens())
-                usersOnline.getItems().addAll(tokenizer.nextToken());
+                //TODO dont add this.user to list
+                usersOnline.getItems().add(tokenizer.nextToken());
         });
     }
 

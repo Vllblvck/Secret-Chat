@@ -1,4 +1,4 @@
-package com.mypackage;
+package com.mypackage.Messages;
 
 import java.io.Serializable;
 
@@ -16,15 +16,7 @@ public class Message implements Serializable {
         return msg;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
     public MessageType getType() {
         return type;
-    }
-
-    public void setType(MessageType type) {
-        this.type = type;
     }
 }

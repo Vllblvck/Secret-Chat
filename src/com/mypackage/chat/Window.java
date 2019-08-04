@@ -17,7 +17,7 @@ public class Window extends Application {
     public void start(Stage primaryStage) {
         try {
             ChatClient.connectToServer();
-            Parent root = FXMLLoader.load(getClass().getResource("loginGui.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("gui/loginGui.fxml"));
             primaryStage.setTitle("Tajny czat");
             primaryStage.setScene(new Scene(root, 400, 200));
             primaryStage.setResizable(false);
