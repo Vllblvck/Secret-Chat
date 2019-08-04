@@ -12,7 +12,7 @@ public class ChatServer {
     protected static Vector<ClientHandler> clientsOnline = new Vector<>();
     protected static ArrayList<String> userAccounts = new ArrayList<>();
     private final int SERVER_PORT = 5000;
-    private final String FILE_PATH = "useraccounts.txt";
+    private final String FILE_PATH = "useraccounts.txt"; //TODO database instead of text file
     private ServerSocket serverSocket;
 
     public ChatServer() throws IOException {

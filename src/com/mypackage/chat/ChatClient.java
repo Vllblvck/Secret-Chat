@@ -1,13 +1,12 @@
 package com.mypackage.chat;
 
-import com.mypackage.Messages.Message;
-import com.mypackage.Messages.MessageType;
+import com.mypackage.messages.Message;
+import com.mypackage.messages.MessageType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ChatClient {
@@ -15,11 +14,11 @@ public class ChatClient {
     protected static String username;
     protected static String usersOnline;
     protected static ChatController chatController;
+    protected static String recipient;
     private static Socket socket;
     private static ObjectInputStream inputStream;
     private static ObjectOutputStream outputStream;
     private static AtomicBoolean readMsgIsRunning = new AtomicBoolean(false);
-    private static AtomicBoolean sendMsgIsRunning = new AtomicBoolean(false);
     private static Message outMsg;
     private static Message inMsg;
 
@@ -37,16 +36,13 @@ public class ChatClient {
         }
     }
 
-    public static void sendingMsg() {
-        Thread sendMsg = new Thread(() -> {
-
-            while (sendMsgIsRunning.get()) {
-            }
-
-        });
-
-        sendMsgIsRunning.set(true);
-        sendMsg.start();
+    //TODO sending messages to specified users
+    public static void sendMsg(String msg) {
+        try {
+            outputStream.writeObject(new Message(MessageType.USER, recipient, msg));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void readingMsg() {
@@ -57,19 +53,18 @@ public class ChatClient {
                     inMsg = (Message) inputStream.readObject();
 
                     switch (inMsg.getType()) {
+
                         case CONNECT:
                             usersOnline = inMsg.getMsg();
-                            chatController.updateGUI();
+                            chatController.updateUsersList();
                             break;
+
                         case USER:
+                            chatController.displayMessage(inMsg.getRecipient() + ":" + inMsg.getMsg());
                             break;
                     }
 
-                } catch (SocketException e) {
-                    readMsgIsRunning.set(false);
-                } catch (ClassNotFoundException e) {
-                    readMsgIsRunning.set(false);
-                } catch (IOException e) {
+                } catch (ClassNotFoundException | IOException e) {
                     readMsgIsRunning.set(false);
                 }
             }

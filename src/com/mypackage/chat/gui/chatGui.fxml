@@ -32,13 +32,14 @@
             <children>
                 <ScrollPane prefHeight="528.0" prefWidth="600.0">
                     <content>
-                        <ListView prefHeight="505.0" prefWidth="585.0"/>
+                        <ListView fx:id="messages" prefHeight="505.0" prefWidth="585.0"/>
                     </content>
                 </ScrollPane>
                 <HBox prefHeight="63.0" prefWidth="600.0">
                     <children>
-                        <TextArea prefHeight="68.0" prefWidth="486.0" promptText="Enter Message"/>
-                        <Button mnemonicParsing="false" prefHeight="92.0" prefWidth="142.0" text="Send"/>
+                        <TextArea fx:id="message" prefHeight="68.0" prefWidth="486.0" promptText="Enter Message"/>
+                        <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="92.0" prefWidth="142.0"
+                                text="Send" onAction="#sendMessage"/>
                     </children>
                 </HBox>
             </children>

@@ -1,7 +1,7 @@
 package com.mypackage.server;
 
-import com.mypackage.Messages.Message;
-import com.mypackage.Messages.MessageType;
+import com.mypackage.messages.Message;
+import com.mypackage.messages.MessageType;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -19,7 +19,6 @@ public class ClientHandler implements Runnable {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private String username;
-    private boolean loggedIn = false;
 
     public ClientHandler(Socket socket) throws IOException {
         this.socket = socket;
@@ -42,6 +41,7 @@ public class ClientHandler implements Runnable {
                         sendClientsOnline();
                         break;
                     case USER:
+                        sendMessage(inMsg);
                         break;
                 }
 
@@ -54,6 +54,14 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 close();
                 removeClient(this.username);
+            }
+        }
+    }
+
+    private void sendMessage(Message msg) throws IOException {
+        for (ClientHandler client : clientsOnline) {
+            if(client.username.equals(msg.getRecipient())) {
+                client.outputStream.writeObject(msg);
             }
         }
     }
@@ -80,7 +88,6 @@ public class ClientHandler implements Runnable {
                 StringTokenizer tokenizer = new StringTokenizer(loginData, "|");
                 username = tokenizer.nextToken();
                 if (!isLoggedIn(username)) {
-                    loggedIn = true;
                     clientsOnline.add(this);
                     return true;
                 }
@@ -121,7 +128,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void close() {
+    private void close() {
         try {
             if (inputStream != null)
                 inputStream.close();
