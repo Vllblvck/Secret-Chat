@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -17,18 +18,23 @@ import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
     @FXML
-    private TextField login;
+    protected TextField login;
     @FXML
-    private PasswordField password;
+    protected PasswordField password;
+    @FXML
+    protected Button loginButton;
 
-    @FXML
     public void loginButtonPush(ActionEvent event) {
         try {
-            if (ChatClient.login(login.getText(), password.getText())) {
-                Parent root = FXMLLoader.load(getClass().getResource("chatGui.fxml"));
+            if(ChatClient.login(login.getText(),password.getText())) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("chatGui.fxml"));
+                Parent root = loader.load();
                 Stage primaryStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 primaryStage.setScene(new Scene(root, 900, 600));
-            }//TODO highliting text filed when login data is wrong
+                ChatClient.chatController = loader.getController();
+                ChatClient.readingMsg();
+                //TODO highliting text filed when login data is wrong
+            }
         } catch (IOException e) {
             //TODO add label that indicates this exception
             e.printStackTrace();

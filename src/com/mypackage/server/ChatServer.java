@@ -1,16 +1,16 @@
 package com.mypackage.server;
 
+import com.mypackage.Message;
+import com.mypackage.MessageType;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ChatServer {
-    private static AtomicBoolean serverIsRunning = new AtomicBoolean();
     private final int SERVER_PORT = 5000;
     private final String FILE_PATH = "useraccounts.txt";
     private Vector<ClientHandler> clientsOnline = new Vector<>();
@@ -20,7 +20,6 @@ public class ChatServer {
 
     public ChatServer() throws IOException {
         serverSocket = new ServerSocket(SERVER_PORT);
-        serverIsRunning.set(true);
         loadAccounts();
         connectClient();
     }
@@ -30,13 +29,12 @@ public class ChatServer {
             new ChatServer();
         } catch (IOException e) {
             System.out.println("Failed to run server");
-            serverIsRunning.set(false);
             e.printStackTrace();
         }
     }
 
     public void connectClient() throws IOException {
-        while (serverIsRunning.get()) {
+        while (true) {
             System.out.println("Waiting for new connection");
             socket = serverSocket.accept();
             new Thread(new ClientHandler(socket)).start();
@@ -58,48 +56,60 @@ public class ChatServer {
     }
 
     private class ClientHandler implements Runnable {
+        private Message inMsg;
         private Socket socket;
-        private DataInputStream inputStream;
-        private DataOutputStream outputStream;
+        private ObjectInputStream inputStream;
+        private ObjectOutputStream outputStream;
         private String username;
         private String recipient;
-        private boolean isLoggedIn = false;
+        private boolean loggedIn = false;
 
         public ClientHandler(Socket socket) throws IOException {
             this.socket = socket;
-            this.inputStream = new DataInputStream(socket.getInputStream());
-            this.outputStream = new DataOutputStream(socket.getOutputStream());
+            this.outputStream = new ObjectOutputStream(socket.getOutputStream());
+            this.inputStream = new ObjectInputStream(socket.getInputStream());
         }
 
         @Override
         public void run() {
             while (!socket.isClosed()) {
-                login();
-                //handleMessages();
-                //TODO ogarnij jak aktualizowac liste userow online
-                sendUsersOnline();
-            }
-        }
-
-        private void sendUsersOnline() {
-            try {
-                outputStream.writeUTF(getClientsOnline(this.username));
-            } catch (IOException e) {
-                close();
-                removeClient(this.username);
-                System.out.println("User disconnected");
-            }
-        }
-
-        private void login() {
-            if (!isLoggedIn) {
                 try {
-                    if (checkLogin(inputStream.readUTF())) {
-                        outputStream.writeUTF("logged in");
-                        outputStream.writeUTF(this.username);
-                        outputStream.writeUTF(getClientsOnline(this.username));
+                    inMsg = (Message) inputStream.readObject();
+                    switch (inMsg.getType()) {
+                        case SERVER:
+                            login(inMsg.getMsg());
+                            break;
+                        case USER:
+                            break;
+                        case DISCONNECTED:
+                            removeClient(inMsg.getMsg());
+                            sendClientsOnline();
+
+                    }
+                } catch (EOFException e) {
+                    close();
+                    removeClient(this.username);
+                    System.out.println("User disconnected");
+                } catch (ClassNotFoundException e) {
+                    close();
+                    removeClient(this.username);
+                    System.out.println("User disconnected");
+                } catch (IOException e) {
+                    close();
+                    removeClient(this.username);
+                    System.out.println("User disconnected");
+                }
+            }
+        }
+
+        private void login(String loginData) {
+            if (!loggedIn) {
+                try {
+                    if (checkLogin(loginData)) {
+                        outputStream.writeObject(new Message(MessageType.SERVER, this.username));
+                        sendClientsOnline();
                     } else
-                        outputStream.writeUTF("not logged in");
+                        outputStream.writeObject(new Message(MessageType.SERVER, "incorrect"));
                 } catch (EOFException e) {
                     close();
                     removeClient(this.username);
@@ -112,13 +122,13 @@ public class ChatServer {
             }
         }
 
-        private boolean checkLogin(String loginData) {
+        private boolean checkLogin(String loginData) throws IOException {
             for (String useraccount : userAccounts) {
                 if (useraccount.equals(loginData)) {
                     StringTokenizer tokenizer = new StringTokenizer(loginData, "|");
                     username = tokenizer.nextToken();
-                    if (!ifLoggedIn(username)) {
-                        isLoggedIn = true;
+                    if (!isLoggedIn(username)) {
+                        loggedIn = true;
                         clientsOnline.add(this);
                         System.out.println("Logged in user: " + username);
                         return true;
@@ -128,7 +138,7 @@ public class ChatServer {
             return false;
         }
 
-        private boolean ifLoggedIn(String username) {
+        private boolean isLoggedIn(String username) {
             for (ClientHandler client : clientsOnline) {
                 if (client.username.equals(username))
                     return true;
@@ -136,43 +146,16 @@ public class ChatServer {
             return false;
         }
 
-        private void handleMessages() {
-            if (isLoggedIn) {
-                String receivedMsg;
-
-                try {
-                    receivedMsg = inputStream.readUTF();
-                    System.out.println(receivedMsg);
-
-                    if (recipient != null) {
-                        for (ClientHandler client : clientsOnline) {
-                            if (client.username.equals(recipient) && client.isLoggedIn == true) {
-                                client.outputStream.writeUTF(this.username + " : " + receivedMsg);
-                                break;
-                            }
-                        }
-                    }
-
-                } catch (SocketException e) {
-                    close();
-                    isLoggedIn = false;
-                    removeClient(this.username);
-                    System.out.println("User disconnected");
-                } catch (IOException e) {
-                    close();
-                    isLoggedIn = false;
-                    removeClient(this.username);
-                    System.out.println("User disconnected");
-                }
+        private void sendClientsOnline() throws IOException {
+            for (ClientHandler client : clientsOnline) {
+                client.outputStream.writeObject(new Message(MessageType.SERVER, getClientsOnline()));
             }
         }
 
-        private String getClientsOnline(String excludedName) {
+        private String getClientsOnline() {
             StringBuffer clientsString = new StringBuffer();
 
             for (ClientHandler client : clientsOnline) {
-                if (client.username.equals(excludedName))
-                    continue;
                 clientsString.append(client.username + "\n");
             }
             return clientsString.toString();
@@ -189,9 +172,12 @@ public class ChatServer {
 
         public void close() {
             try {
-                inputStream.close();
-                outputStream.close();
-                socket.close();
+                if (inputStream != null)
+                    inputStream.close();
+                if (outputStream != null)
+                    outputStream.close();
+                if (socket != null)
+                    socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Could not close streams");
