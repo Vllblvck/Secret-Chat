@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
+import static com.mypackage.chat.Window.client;
 
 public class ChatController implements Initializable {
     @FXML
@@ -24,35 +25,38 @@ public class ChatController implements Initializable {
     @FXML
     private TextArea message;
 
+    @FXML
+    private void sendButtonClick() {
+        client.setRecipient(usersOnline.getSelectionModel().getSelectedItem());
+
+        if (client.getRecipient() != null) {
+            String toSend = message.getText().replaceAll("\n", System.getProperty("line.separator"));
+            client.sendMsg(toSend);
+        }
+    }
+
     public void updateUsersList() {
         Platform.runLater(() -> {
-            StringTokenizer tokenizer = new StringTokenizer(ChatClient.usersOnline, "\n");
+            StringTokenizer tokenizer = new StringTokenizer(client.getUsersOnline(), "\n");
             usersCounter.setText(Integer.toString(tokenizer.countTokens() - 1));
             usersOnline.getItems().clear();
+
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
-                if (!token.equals(ChatClient.username))
+                if (!token.equals(client.getUsername()))
                     usersOnline.getItems().add(token);
             }
         });
     }
 
-    public void sendMessage() {
-        ChatClient.recipient = usersOnline.getSelectionModel().getSelectedItem();
-        if (ChatClient.recipient != null) {
-            String toSend = message.getText().replaceAll("\n", System.getProperty("line.separator"));
-            ChatClient.sendMsg(toSend);
-            displayMessage("You:" + toSend);
-        }
-    }
-
-    public void displayMessage(String msg) {
-        Platform.runLater(() -> messages.getItems().add(msg));
+    private void displayMessage(String newValue) {
+        Platform.runLater(() -> messages.setItems(client.chatWindows.get(newValue)));
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        username.setText(ChatClient.username);
+        username.setText(client.getUsername());
+        usersOnline.getSelectionModel().selectedItemProperty().addListener((v, oldValue, newValue) -> displayMessage(newValue));
     }
 
 }

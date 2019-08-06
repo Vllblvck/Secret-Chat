@@ -39,7 +39,7 @@
                     <children>
                         <TextArea fx:id="message" prefHeight="68.0" prefWidth="486.0" promptText="Enter Message"/>
                         <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="92.0" prefWidth="142.0"
-                                text="Send" onAction="#sendMessage"/>
+                                text="Send" onAction="#sendButtonClick"/>
                     </children>
                 </HBox>
             </children>

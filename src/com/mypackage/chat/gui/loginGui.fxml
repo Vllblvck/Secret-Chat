@@ -13,7 +13,7 @@
     <children>
         <PasswordField fx:id="password" layoutX="126.0" layoutY="110.0" promptText="password"/>
         <TextField fx:id="login" layoutX="126.0" layoutY="75.0" promptText="login"/>
-        <Button fx:id="loginButton" layoutX="161.0" layoutY="154.0" mnemonicParsing="false" onAction="#loginButtonPush"
+        <Button fx:id="loginButton" layoutX="161.0" layoutY="154.0" mnemonicParsing="false"
                 prefHeight="25.0" prefWidth="80.0" text="Log in"/>
         <Label layoutX="128.0" layoutY="25.0" text="Tajny czat xD">
             <font>

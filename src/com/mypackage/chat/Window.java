@@ -9,6 +9,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class Window extends Application {
+    protected static Client client;
+    protected static Stage mainStage;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -16,13 +19,14 @@ public class Window extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            ChatClient.connectToServer();
             Parent root = FXMLLoader.load(getClass().getResource("gui/loginGui.fxml"));
-            primaryStage.setTitle("Tajny czat");
-            primaryStage.setScene(new Scene(root, 400, 200));
-            primaryStage.setResizable(false);
-            primaryStage.setOnCloseRequest(e -> ChatClient.close());
-            primaryStage.show();
+            client = new Client();
+            mainStage = primaryStage;
+            mainStage.setTitle("Secret Chat");
+            mainStage.setScene(new Scene(root, 400, 200));
+            mainStage.setResizable(false);
+            mainStage.setOnCloseRequest(e -> client.close());
+            mainStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }

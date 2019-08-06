@@ -3,18 +3,16 @@ package com.mypackage.server;
 import com.mypackage.messages.Message;
 import com.mypackage.messages.MessageType;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-import static com.mypackage.server.ChatServer.clientsOnline;
-import static com.mypackage.server.ChatServer.userAccounts;
+import static com.mypackage.server.Server.userAccounts;
+import static com.mypackage.server.Server.usersOnline;
 
 public class ClientHandler implements Runnable {
-    private Message inMsg;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
@@ -30,99 +28,92 @@ public class ClientHandler implements Runnable {
     public void run() {
         while (!socket.isClosed()) {
             try {
-                inMsg = (Message) inputStream.readObject();
+                Message inMsg = (Message) inputStream.readObject();
 
                 switch (inMsg.getType()) {
+
                     case CONNECT:
-                        login(inMsg.getMsg());
+                        checkLogin(inMsg.getMsg());
                         break;
+
                     case DISCONNECT:
                         removeClient(inMsg.getMsg());
-                        sendClientsOnline();
+                        sendUsersOnline();
                         break;
+
                     case USER:
-                        sendMessage(inMsg);
+                        sendMsg(inMsg);
                         break;
                 }
 
-            } catch (EOFException e) {
-                close();
-                removeClient(this.username);
-            } catch (ClassNotFoundException e) {
-                close();
-                removeClient(this.username);
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 close();
                 removeClient(this.username);
             }
         }
     }
 
-    private void sendMessage(Message msg) throws IOException {
-        for (ClientHandler client : clientsOnline) {
-            if(client.username.equals(msg.getRecipient())) {
-                client.outputStream.writeObject(msg);
-            }
-        }
-    }
-
-    private void login(String loginData) {
-        try {
-            if (checkLogin(loginData)) {
-                outputStream.writeObject(new Message(MessageType.CONNECT, this.username));
-                sendClientsOnline();
-            } else
-                outputStream.writeObject(new Message(MessageType.CONNECT, "incorrect"));
-        } catch (EOFException e) {
-            close();
-            removeClient(this.username);
-        } catch (IOException e) {
-            close();
-            removeClient(this.username);
-        }
-    }
-
-    private boolean checkLogin(String loginData) {
+    //TODO else for user already logged in and else for wrong logindata
+    private void checkLogin(String loginData) throws IOException {
         for (String useraccount : userAccounts) {
+
             if (useraccount.equals(loginData)) {
                 StringTokenizer tokenizer = new StringTokenizer(loginData, "|");
                 username = tokenizer.nextToken();
+
                 if (!isLoggedIn(username)) {
-                    clientsOnline.add(this);
-                    return true;
+                    usersOnline.add(this);
+                    loginUser();
+                    break;
+                } else {
+                    outputStream.writeObject(new Message(MessageType.CONNECT, "incorrect"));
+                    break;
                 }
             }
         }
-        return false;
+    }
+
+    private void loginUser() throws IOException {
+        outputStream.writeObject(new Message(MessageType.CONNECT, this.username));
+        sendUsersOnline();
     }
 
     private boolean isLoggedIn(String username) {
-        for (ClientHandler client : clientsOnline) {
+        for (ClientHandler client : usersOnline) {
             if (client.username.equals(username))
                 return true;
         }
         return false;
     }
 
-    private void sendClientsOnline() throws IOException {
-        for (ClientHandler client : clientsOnline) {
-            client.outputStream.writeObject(new Message(MessageType.CONNECT, getClientsOnline()));
+    private void removeClient(String name) {
+        for (ClientHandler client : usersOnline) {
+            if (client.username.equals(name)) {
+                usersOnline.remove(client);
+                break;
+            }
         }
     }
 
-    private String getClientsOnline() {
+    private void sendUsersOnline() throws IOException {
+        for (ClientHandler client : usersOnline) {
+            client.outputStream.writeObject(new Message(MessageType.CONNECT, getUsersOnline()));
+        }
+    }
+
+    private String getUsersOnline() {
         StringBuffer clientsString = new StringBuffer();
 
-        for (ClientHandler client : clientsOnline) {
+        for (ClientHandler client : usersOnline) {
             clientsString.append(client.username + "\n");
         }
         return clientsString.toString();
     }
 
-    private void removeClient(String name) {
-        for (ClientHandler client : clientsOnline) {
-            if (client.username.equals(name)) {
-                clientsOnline.remove(client);
+    private void sendMsg(Message msg) throws IOException {
+        for (ClientHandler client : usersOnline) {
+            if (client.username.equals(msg.getRecipient())) {
+                client.outputStream.writeObject(msg);
                 break;
             }
         }
