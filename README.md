@@ -6,7 +6,8 @@ You can use it to have more private conversations with your friends as there is 
 -using sockets in java\
 -basics of javafx\
 -practiced thread using and increased my knowledge about them\
--increased my knowledge about streams in java
+-increased my knowledge about streams in java\
+-basics of using github
 
 # TODO
 -add database support for keeping accounts instead of text file\
