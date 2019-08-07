@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String msg;
+    private String msg; //TODO encrypt messages
     private String recipient;
     private String sender;
     private MessageType type;
@@ -33,5 +33,7 @@ public class Message implements Serializable {
         return recipient;
     }
 
-    public String getSender() { return sender; }
+    public String getSender() {
+        return sender;
+    }
 }

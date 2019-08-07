@@ -12,20 +12,23 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Client {
     private final int SERVER_PORT = 5000;
     protected HashMap<String, ObservableList<String>> chatWindows = new HashMap<>();
     private String usersOnline;
     private ChatController chatController;
+    private LoginController loginController;
     private String recipient;
     private String username;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private boolean readMsgRunning = false;
+    private AtomicBoolean readMsgRunning = new AtomicBoolean(false);
 
-    public Client() {
+    public Client(LoginController loginController) {
+        this.loginController = loginController;
         connectToServer();
     }
 
@@ -34,9 +37,9 @@ public class Client {
             socket = new Socket("127.0.0.1", SERVER_PORT);
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             inputStream = new ObjectInputStream(socket.getInputStream());
+            loginController.setServerStatus("ON");
         } catch (IOException e) {
-            e.printStackTrace();
-            //TODO add label about server not running
+            loginController.setServerStatus("OFF");
         }
     }
 
@@ -52,7 +55,7 @@ public class Client {
 
     public void readingMsg() {
         Thread readMsg = new Thread(() -> {
-            while (readMsgRunning) {
+            while (readMsgRunning.get()) {
                 try {
                     Message inMsg = (Message) inputStream.readObject();
 
@@ -70,12 +73,12 @@ public class Client {
                     }
 
                 } catch (ClassNotFoundException | IOException e) {
-                    readMsgRunning = false;
+                    readMsgRunning.set(false);
                 }
             }
         });
 
-        readMsgRunning = true;
+        readMsgRunning.set(true);
         readMsg.start();
     }
 
@@ -102,7 +105,6 @@ public class Client {
                 username = inMsg.getMsg();
                 return true;
             }
-
         } catch (IOException | ClassNotFoundException e) {
             close();
         }
@@ -119,6 +121,8 @@ public class Client {
                 inputStream.close();
             if (socket != null)
                 socket.close();
+
+            Platform.exit();
         } catch (IOException e) {
             e.printStackTrace();
         }

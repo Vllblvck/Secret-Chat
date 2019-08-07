@@ -53,13 +53,14 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    //TODO else for user already logged in and else for wrong logindata
     private void checkLogin(String loginData) throws IOException {
-        for (String useraccount : userAccounts) {
+        boolean correctData = false;
 
+        for (String useraccount : userAccounts) {
             if (useraccount.equals(loginData)) {
                 StringTokenizer tokenizer = new StringTokenizer(loginData, "|");
                 username = tokenizer.nextToken();
+                correctData = true;
 
                 if (!isLoggedIn(username)) {
                     usersOnline.add(this);
@@ -70,6 +71,10 @@ public class ClientHandler implements Runnable {
                     break;
                 }
             }
+        }
+
+        if (!correctData) {
+            outputStream.writeObject(new Message(MessageType.CONNECT, "incorrect"));
         }
     }
 

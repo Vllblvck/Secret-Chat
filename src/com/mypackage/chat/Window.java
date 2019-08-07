@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -19,16 +20,21 @@ public class Window extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("gui/loginGui.fxml"));
-            client = new Client();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("gui/LoginGui.fxml"));
+            Parent root = loader.load();
+            client = new Client(loader.getController());
             mainStage = primaryStage;
-            mainStage.setTitle("Secret Chat");
-            mainStage.setScene(new Scene(root, 400, 200));
+            mainStage.initStyle(StageStyle.UNDECORATED);
+            mainStage.setScene(new Scene(root, 600, 425));
             mainStage.setResizable(false);
             mainStage.setOnCloseRequest(e -> client.close());
             mainStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void goToURL(String url) {
+        getHostServices().showDocument(url);
     }
 }
