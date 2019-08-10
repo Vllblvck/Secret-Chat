@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 class Client {
-    private final int SERVER_PORT = 5000;
     HashMap<String, ObservableList<String>> chatWindows = new HashMap<>();
     ArrayList<String> usersOnline = new ArrayList<>();
     private ChatController chatController;
@@ -36,7 +35,7 @@ class Client {
 
     private void connect() {
         try {
-            socket = new Socket("127.0.0.1", SERVER_PORT);
+            socket = new Socket("127.0.0.1", 5000);
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             inputStream = new ObjectInputStream(socket.getInputStream());
             loginController.setServerStatus("ON");

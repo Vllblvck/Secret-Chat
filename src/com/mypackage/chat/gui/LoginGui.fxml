@@ -7,50 +7,46 @@
             prefHeight="425.0" prefWidth="600.0" style="-fx-background-color: #154360;"
             xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.mypackage.chat.LoginController">
-    <children>
-        <Label layoutX="78.0" layoutY="101.0" text="SECRET CHAT" textFill="WHITE">
+    <Label layoutX="78.0" layoutY="101.0" text="SECRET CHAT" textFill="WHITE">
+        <font>
+            <Font size="25.0"/>
+        </font>
+    </Label>
+    <AnchorPane layoutX="286.0" layoutY="53.0" prefHeight="350.0" prefWidth="300.0"
+                style="-fx-background-color: #2874A6;">
+        <TextField fx:id="usernameField" layoutX="50.0" layoutY="106.0" pickOnBounds="false" prefHeight="35.0"
+                   prefWidth="200.0" promptText="username"
+                   style="-fx-background-color: #154360; -fx-text-fill: #FFFFFF;"/>
+        <PasswordField fx:id="passwordField" layoutX="50.0" layoutY="175.0" pickOnBounds="false"
+                       prefHeight="35.0" prefWidth="200.0" promptText="password"
+                       style="-fx-background-color: #154360; -fx-text-fill: #FFFFFF;"/>
+        <Button fx:id="loginButton" defaultButton="true" layoutX="50.0" layoutY="259.0" mnemonicParsing="false"
+                pickOnBounds="false" prefHeight="35.0" prefWidth="200.0" style="-fx-background-color: #3498DB;"
+                text="Sing in" textFill="WHITE"/>
+        <Label layoutX="101.0" layoutY="35.0" prefHeight="36.0" prefWidth="98.0" text="SING IN"
+               textAlignment="CENTER" textFill="WHITE">
             <font>
-                <Font size="25.0"/>
+                <Font name="Arial" size="25.0"/>
             </font>
         </Label>
-        <AnchorPane layoutX="286.0" layoutY="53.0" prefHeight="350.0" prefWidth="300.0"
-                    style="-fx-background-color: #2874A6;">
-            <children>
-                <TextField fx:id="usernameField" layoutX="50.0" layoutY="106.0" pickOnBounds="false" prefHeight="35.0"
-                           prefWidth="200.0" promptText="username"
-                           style="-fx-background-color: #154360; -fx-text-fill: #FFFFFF;"/>
-                <PasswordField fx:id="passwordField" layoutX="50.0" layoutY="175.0" pickOnBounds="false"
-                               prefHeight="35.0" prefWidth="200.0" promptText="password"
-                               style="-fx-background-color: #154360; -fx-text-fill: #FFFFFF;"/>
-                <Button fx:id="loginButton" defaultButton="true" layoutX="50.0" layoutY="259.0" mnemonicParsing="false"
-                        pickOnBounds="false" prefHeight="35.0" prefWidth="200.0" style="-fx-background-color: #3498DB;"
-                        text="Sing in" textFill="WHITE"/>
-                <Label layoutX="101.0" layoutY="35.0" prefHeight="36.0" prefWidth="98.0" text="SING IN"
-                       textAlignment="CENTER" textFill="WHITE">
-                    <font>
-                        <Font name="Arial" size="25.0"/>
-                    </font>
-                </Label>
-                <Hyperlink fx:id="hyperlink" layoutX="64.0" layoutY="313.0" pickOnBounds="false"
-                           text="Forgot username or password?" textFill="WHITE"/>
-                <Label fx:id="wrongData" layoutX="64.0" layoutY="222.0" prefHeight="17.0" prefWidth="172.0"
-                       textFill="RED"/>
-            </children>
-        </AnchorPane>
-        <Button fx:id="exitButton" layoutX="562.0" layoutY="15.0" mnemonicParsing="false" pickOnBounds="false"
-                prefHeight="25.0" prefWidth="5.0" style="-fx-background-color: #3498DB;" text="X"/>
-        <Button fx:id="minimizeButton" layoutX="532.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0"
-                prefWidth="5.0" style="-fx-background-color: #3498DB;" text="_"/>
-        <Label layoutX="81.0" layoutY="213.0" text="SERVER STATUS:" textFill="WHITE">
-            <font>
-                <Font size="20.0"/>
-            </font>
-        </Label>
-        <Label fx:id="serverStatus" layoutX="139.0" layoutY="277.0" prefHeight="30.0" prefWidth="73.0"
-               textAlignment="CENTER">
-            <font>
-                <Font size="20.0"/>
-            </font>
-        </Label>
-    </children>
+        <Hyperlink fx:id="hyperlink" layoutX="64.0" layoutY="313.0" pickOnBounds="false"
+                   text="Forgot username or password?" textFill="WHITE"/>
+        <Label fx:id="wrongData" layoutX="64.0" layoutY="222.0" prefHeight="17.0" prefWidth="172.0"
+               textFill="RED"/>
+    </AnchorPane>
+    <Button fx:id="exitButton" layoutX="562.0" layoutY="15.0" mnemonicParsing="false" pickOnBounds="false"
+            prefHeight="25.0" prefWidth="5.0" style="-fx-background-color: #3498DB;" text="X"/>
+    <Button fx:id="minimizeButton" layoutX="532.0" layoutY="15.0" mnemonicParsing="false" prefHeight="25.0"
+            prefWidth="5.0" style="-fx-background-color: #3498DB;" text="_"/>
+    <Label layoutX="81.0" layoutY="213.0" text="SERVER STATUS:" textFill="WHITE">
+        <font>
+            <Font size="20.0"/>
+        </font>
+    </Label>
+    <Label fx:id="serverStatus" layoutX="139.0" layoutY="277.0" prefHeight="30.0" prefWidth="73.0"
+           textAlignment="CENTER">
+        <font>
+            <Font size="20.0"/>
+        </font>
+    </Label>
 </AnchorPane>

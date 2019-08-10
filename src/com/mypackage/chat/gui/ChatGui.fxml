@@ -8,54 +8,44 @@
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mypackage.chat.ChatController">
     <left>
         <VBox prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-            <children>
-                <HBox prefHeight="76.0" prefWidth="300.0">
-                    <children>
-                        <Label prefHeight="35.0" prefWidth="300.0"
-                               style="-fx-background-color: #3498DB; -fx-border-color: #3498DB;" text="Users online:"
-                               textAlignment="CENTER" textFill="WHITE">
-                            <font>
-                                <Font size="20.0"/>
-                            </font>
-                        </Label>
-                    </children>
-                </HBox>
-                <ListView fx:id="usersOnline" prefHeight="591.0" prefWidth="300.0"
-                          style="-fx-border-color: #3498DB; -fx-font-size: 20;"/>
-            </children>
+            <HBox prefHeight="76.0" prefWidth="300.0">
+                <Label prefHeight="35.0" prefWidth="300.0"
+                       style="-fx-background-color: #3498DB; -fx-border-color: #3498DB;" text="Users online:"
+                       textAlignment="CENTER" textFill="WHITE">
+                    <font>
+                        <Font size="20.0"/>
+                    </font>
+                </Label>
+            </HBox>
+            <ListView fx:id="usersOnline" prefHeight="591.0" prefWidth="300.0"
+                      style="-fx-border-color: #3498DB; -fx-font-size: 20;"/>
         </VBox>
     </left>
     <center>
         <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-            <children>
-                <ListView fx:id="messages" pickOnBounds="false" prefHeight="530.0" prefWidth="600.0"
-                          style="-fx-font-size: 20; -fx-border-color: #3498DB;"/>
-                <HBox prefHeight="63.0" prefWidth="600.0">
-                    <children>
-                        <TextField fx:id="message" prefHeight="50.0" prefWidth="534.0"
-                                   style="-fx-border-color: #3498DB;">
-                            <font>
-                                <Font size="18.0"/>
-                            </font>
-                        </TextField>
-                        <Button fx:id="sendButton" defaultButton="true" mnemonicParsing="false" pickOnBounds="false"
-                                prefHeight="49.0" prefWidth="90.0"
-                                style="-fx-background-color: #3498DB; -fx-border-color: #3498DB;" text="SEND"
-                                textFill="WHITE"/>
-                    </children>
-                </HBox>
-            </children>
+            <ListView fx:id="messages" pickOnBounds="false" prefHeight="530.0" prefWidth="600.0"
+                      style="-fx-font-size: 20; -fx-border-color: #3498DB;"/>
+            <HBox prefHeight="63.0" prefWidth="600.0">
+                <TextField fx:id="message" prefHeight="50.0" prefWidth="534.0"
+                           style="-fx-border-color: #3498DB;">
+                    <font>
+                        <Font size="18.0"/>
+                    </font>
+                </TextField>
+                <Button fx:id="sendButton" defaultButton="true" mnemonicParsing="false" pickOnBounds="false"
+                        prefHeight="49.0" prefWidth="90.0"
+                        style="-fx-background-color: #3498DB; -fx-border-color: #3498DB;" text="SEND"
+                        textFill="WHITE"/>
+            </HBox>
         </VBox>
     </center>
     <top>
         <AnchorPane prefHeight="35.0" prefWidth="900.0" style="-fx-background-color: #154360;"
                     BorderPane.alignment="CENTER">
-            <children>
-                <Button fx:id="exitButton" layoutX="862.0" layoutY="5.0" mnemonicParsing="false" prefHeight="25.0"
-                        prefWidth="5.0" style="-fx-background-color: #3498DB;" text="X"/>
-                <Button fx:id="minimizeButton" layoutX="831.0" layoutY="5.0" mnemonicParsing="false" prefHeight="25.0"
-                        prefWidth="5.0" style="-fx-background-color: #3498DB;" text="_"/>
-            </children>
+            <Button fx:id="exitButton" layoutX="862.0" layoutY="5.0" mnemonicParsing="false" prefHeight="25.0"
+                    prefWidth="5.0" style="-fx-background-color: #3498DB;" text="X"/>
+            <Button fx:id="minimizeButton" layoutX="831.0" layoutY="5.0" mnemonicParsing="false" prefHeight="25.0"
+                    prefWidth="5.0" style="-fx-background-color: #3498DB;" text="_"/>
         </AnchorPane>
     </top>
 </BorderPane>

@@ -10,12 +10,10 @@ import java.util.HashMap;
 public class Server {
     static HashMap<String, ClientHandler> usersOnline = new HashMap<>();
     static ArrayList<String> userAccounts = new ArrayList<>();
-    private final int SERVER_PORT = 5000;
-    private final String FILE_PATH = "useraccounts.txt"; //TODO database instead of text file
     private ServerSocket serverSocket;
 
     private Server() throws IOException {
-        serverSocket = new ServerSocket(SERVER_PORT);
+        serverSocket = new ServerSocket(5000);
         System.out.println("Server is running");
         loadAccounts();
         connectClient();
@@ -39,7 +37,9 @@ public class Server {
 
     private void loadAccounts() {
         String line;
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(FILE_PATH))) {
+        //TODO database instead of text file
+        String filePath = "useraccounts.txt";
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(filePath))) {
 
             while ((line = fileReader.readLine()) != null) {
                 userAccounts.add(line);
