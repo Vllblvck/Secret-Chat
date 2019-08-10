@@ -5,15 +5,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Server {
-    protected static ArrayList<ClientHandler> usersOnline = new ArrayList<>();
-    protected static ArrayList<String> userAccounts = new ArrayList<>();
+    static HashMap<String, ClientHandler> usersOnline = new HashMap<>();
+    static ArrayList<String> userAccounts = new ArrayList<>();
     private final int SERVER_PORT = 5000;
     private final String FILE_PATH = "useraccounts.txt"; //TODO database instead of text file
     private ServerSocket serverSocket;
 
-    public Server() throws IOException {
+    private Server() throws IOException {
         serverSocket = new ServerSocket(SERVER_PORT);
         System.out.println("Server is running");
         loadAccounts();

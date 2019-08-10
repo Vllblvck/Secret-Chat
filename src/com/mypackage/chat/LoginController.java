@@ -18,6 +18,10 @@ import static com.mypackage.chat.Window.mainStage;
 
 public class LoginController implements Initializable {
     @FXML
+    private Label serverStatus;
+    @FXML
+    private Label wrongData;
+    @FXML
     private TextField usernameField;
     @FXML
     private PasswordField passwordField;
@@ -30,49 +34,62 @@ public class LoginController implements Initializable {
     @FXML
     private Hyperlink hyperlink;
     @FXML
-    private Label serverStatus;
-    @FXML
-    private AnchorPane window;
+    private AnchorPane anchorPane;
 
     private double xOffset;
     private double yOffset;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        window.setOnMousePressed(mouseEvent -> {
+        setWindowDrag();
+        setLoginButtonAction();
+        setWindowButtons();
+        setHyperlink();
+    }
+
+    private void setWindowDrag() {
+        anchorPane.setOnMousePressed(mouseEvent -> {
             xOffset = mouseEvent.getSceneX();
             yOffset = mouseEvent.getSceneY();
         });
 
-        window.setOnMouseDragged(mouseEvent -> {
+        anchorPane.setOnMouseDragged(mouseEvent -> {
             mainStage.setX(mouseEvent.getScreenX() - xOffset);
             mainStage.setY(mouseEvent.getScreenY() - yOffset);
         });
+    }
 
+    private void setLoginButtonAction() {
         loginButton.setOnAction(event -> {
             try {
-                if (client.login(usernameField.getText(), passwordField.getText())) {
+                if (client.loginRequest(usernameField.getText(), passwordField.getText())) {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("gui/ChatGui.fxml"));
                     Parent root = loader.load();
+                    client.setUsername(usernameField.getText());
                     client.setChatController(loader.getController());
                     client.readingMsg();
                     mainStage.setScene(new Scene(root, 900, 600));
                 } else {
-                    //TODO highlight text filed when login data is wrong
+                    wrongData.setText("Wrong username or password!");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+    }
 
+    private void setWindowButtons() {
         exitButton.setOnAction(event -> client.close());
         minimizeButton.setOnAction(event -> mainStage.setIconified(true));
+    }
+
+    private void setHyperlink() {
         hyperlink.setOnAction(event -> {
             new Window().goToURL("https://www.facebook.com");
         });
     }
 
-    public void setServerStatus(String serverStatus) {
+    void setServerStatus(String serverStatus) {
         this.serverStatus.setText(serverStatus);
         if (serverStatus.equals("ON"))
             this.serverStatus.setTextFill(Color.GREEN);

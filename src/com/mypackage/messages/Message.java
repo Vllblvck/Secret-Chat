@@ -14,11 +14,10 @@ public class Message implements Serializable {
         this.msg = msg;
     }
 
-    public Message(MessageType type, String recipient, String sender, String msg) {
+    public Message(MessageType type, String recipient, String msg) {
         this.type = type;
         this.recipient = recipient;
         this.msg = msg;
-        this.sender = sender;
     }
 
     public String getMsg() {
@@ -35,5 +34,9 @@ public class Message implements Serializable {
 
     public String getSender() {
         return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }

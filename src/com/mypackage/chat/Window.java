@@ -10,8 +10,8 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 
 public class Window extends Application {
-    protected static Client client;
-    protected static Stage mainStage;
+    static Client client;
+    static Stage mainStage;
 
     public static void main(String[] args) {
         launch(args);
@@ -27,14 +27,14 @@ public class Window extends Application {
             mainStage.initStyle(StageStyle.UNDECORATED);
             mainStage.setScene(new Scene(root, 600, 425));
             mainStage.setResizable(false);
-            mainStage.setOnCloseRequest(e -> client.close());
+            mainStage.setOnCloseRequest(windowEvent -> client.close());
             mainStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void goToURL(String url) {
+    void goToURL(String url) {
         getHostServices().showDocument(url);
     }
 }

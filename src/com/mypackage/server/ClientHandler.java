@@ -17,8 +17,9 @@ public class ClientHandler implements Runnable {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private String username;
+    private Message outMsg;
 
-    public ClientHandler(Socket socket) throws IOException {
+    ClientHandler(Socket socket) throws IOException {
         this.socket = socket;
         this.outputStream = new ObjectOutputStream(socket.getOutputStream());
         this.inputStream = new ObjectInputStream(socket.getInputStream());
@@ -37,8 +38,7 @@ public class ClientHandler implements Runnable {
                         break;
 
                     case DISCONNECT:
-                        removeClient(inMsg.getMsg());
-                        sendUsersOnline();
+                        removeClient();
                         break;
 
                     case USER:
@@ -48,90 +48,69 @@ public class ClientHandler implements Runnable {
 
             } catch (IOException | ClassNotFoundException e) {
                 close();
-                removeClient(this.username);
             }
         }
     }
 
     private void checkLogin(String loginData) throws IOException {
-        boolean correctData = false;
+        if (userAccounts.contains(loginData)) {
+            username = new StringTokenizer(loginData, "|").nextToken();
 
-        for (String useraccount : userAccounts) {
-            if (useraccount.equals(loginData)) {
-                StringTokenizer tokenizer = new StringTokenizer(loginData, "|");
-                username = tokenizer.nextToken();
-                correctData = true;
-
-                if (!isLoggedIn(username)) {
-                    usersOnline.add(this);
-                    loginUser();
-                    break;
-                } else {
-                    outputStream.writeObject(new Message(MessageType.CONNECT, "incorrect"));
-                    break;
-                }
+            if (!isLoggedIn(username)) {
+                loginUser();
+            } else {
+                outputStream.writeObject(new Message(MessageType.SERVER, "incorrect"));
             }
-        }
-
-        if (!correctData) {
-            outputStream.writeObject(new Message(MessageType.CONNECT, "incorrect"));
+        } else {
+            outputStream.writeObject(new Message(MessageType.SERVER, "incorrect"));
         }
     }
 
     private void loginUser() throws IOException {
-        outputStream.writeObject(new Message(MessageType.CONNECT, this.username));
+        outMsg = new Message(MessageType.SERVER, "correct");
+        usersOnline.put(username, this);
+        outputStream.writeObject(outMsg);
         sendUsersOnline();
     }
 
     private boolean isLoggedIn(String username) {
-        for (ClientHandler client : usersOnline) {
-            if (client.username.equals(username))
-                return true;
-        }
-        return false;
+        return usersOnline.containsKey(username);
     }
 
-    private void removeClient(String name) {
-        for (ClientHandler client : usersOnline) {
-            if (client.username.equals(name)) {
-                usersOnline.remove(client);
-                break;
-            }
-        }
+    private void removeClient() throws IOException {
+        usersOnline.remove(username);
+        sendUsersOnline();
     }
 
     private void sendUsersOnline() throws IOException {
-        for (ClientHandler client : usersOnline) {
-            client.outputStream.writeObject(new Message(MessageType.CONNECT, getUsersOnline()));
+        outMsg = new Message(MessageType.SERVER, getUsersOnline());
+
+        for (String user : usersOnline.keySet()) {
+            usersOnline.get(user).outputStream.writeObject(outMsg);
         }
     }
 
     private String getUsersOnline() {
-        StringBuffer clientsString = new StringBuffer();
+        StringBuilder usersString = new StringBuilder();
 
-        for (ClientHandler client : usersOnline) {
-            clientsString.append(client.username + "\n");
+        for (String key : usersOnline.keySet()) {
+            usersString.append(key).append("\n");
         }
-        return clientsString.toString();
+        return usersString.toString();
     }
 
     private void sendMsg(Message msg) throws IOException {
-        for (ClientHandler client : usersOnline) {
-            if (client.username.equals(msg.getRecipient())) {
-                client.outputStream.writeObject(msg);
-                break;
-            }
-        }
+        msg.setSender(username);
+        usersOnline.get(msg.getRecipient()).outputStream.writeObject(msg);
     }
 
     private void close() {
         try {
-            if (inputStream != null)
-                inputStream.close();
-            if (outputStream != null)
-                outputStream.close();
-            if (socket != null)
-                socket.close();
+            inputStream.close();
+            outputStream.close();
+            socket.close();
+            removeClient();
+            System.out.println("User disconnected");
         } catch (IOException e) {
             e.printStackTrace();
         }

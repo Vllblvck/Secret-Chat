@@ -10,29 +10,31 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Client {
+class Client {
     private final int SERVER_PORT = 5000;
-    protected HashMap<String, ObservableList<String>> chatWindows = new HashMap<>();
-    private String usersOnline;
+    HashMap<String, ObservableList<String>> chatWindows = new HashMap<>();
+    ArrayList<String> usersOnline = new ArrayList<>();
     private ChatController chatController;
     private LoginController loginController;
-    private String recipient;
     private String username;
+    private String recipient;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private AtomicBoolean readMsgRunning = new AtomicBoolean(false);
+    private boolean readMsgRunning = false;
+    private Message inMsg;
+    private Message outMsg;
 
-    public Client(LoginController loginController) {
+    Client(LoginController loginController) {
         this.loginController = loginController;
-        connectToServer();
+        connect();
     }
 
-    private void connectToServer() {
+    private void connect() {
         try {
             socket = new Socket("127.0.0.1", SERVER_PORT);
             outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -43,9 +45,53 @@ public class Client {
         }
     }
 
-    public void sendMsg(String msg) {
+    boolean loginRequest(String login, String password) {
         try {
-            Message outMsg = new Message(MessageType.USER, recipient, username, msg);
+            outMsg = new Message(MessageType.CONNECT, login + "|" + password);
+            outputStream.writeObject(outMsg);
+            inMsg = (Message) inputStream.readObject();
+
+            if (inMsg.getMsg().equals("correct") && inMsg.getType().equals(MessageType.SERVER)) {
+                return true;
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            close();
+        }
+        return false;
+    }
+
+    void readingMsg() {
+        Thread readMsg = new Thread(() -> {
+            while (readMsgRunning) {
+                try {
+                    inMsg = (Message) inputStream.readObject();
+                    switch (inMsg.getType()) {
+
+                        case SERVER:
+                            updateUsersOnline(inMsg.getMsg());
+                            updateChatWindows();
+                            chatController.updateUsersList();
+                            break;
+
+                        case USER:
+                            handleMsg();
+                            break;
+                    }
+
+                } catch (ClassNotFoundException | IOException e) {
+                    readMsgRunning = false;
+                }
+            }
+        });
+
+        readMsgRunning = true;
+        readMsg.start();
+    }
+
+    void sendMsg(String msg) {
+        try {
+            outMsg = new Message(MessageType.USER, recipient, msg);
             outputStream.writeObject(outMsg);
             chatWindows.get(outMsg.getRecipient()).add("You: " + outMsg.getMsg());
         } catch (IOException e) {
@@ -53,74 +99,45 @@ public class Client {
         }
     }
 
-    public void readingMsg() {
-        Thread readMsg = new Thread(() -> {
-            while (readMsgRunning.get()) {
-                try {
-                    Message inMsg = (Message) inputStream.readObject();
-
-                    switch (inMsg.getType()) {
-
-                        case CONNECT:
-                            usersOnline = inMsg.getMsg();
-                            chatController.updateUsersList();
-                            addToChatWindows();
-                            break;
-
-                        case USER:
-                            Platform.runLater(() -> chatWindows.get(inMsg.getSender()).add(inMsg.getSender() + ": " + inMsg.getMsg()));
-                            break;
-                    }
-
-                } catch (ClassNotFoundException | IOException e) {
-                    readMsgRunning.set(false);
-                }
-            }
-        });
-
-        readMsgRunning.set(true);
-        readMsg.start();
-    }
-
-    private void addToChatWindows() {
+    private void updateUsersOnline(String usersOnline) {
         StringTokenizer tokenizer = new StringTokenizer(usersOnline, "\n");
-
+        this.usersOnline.clear();
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
-
             if (!token.equals(username)) {
-                if (!chatWindows.containsKey(token))
-                    chatWindows.put(token, FXCollections.observableArrayList());
+                this.usersOnline.add(token);
             }
         }
     }
 
-    protected boolean login(String login, String password) {
-        try {
-            Message outMsg = new Message(MessageType.CONNECT, login + "|" + password);
-            outputStream.writeObject(outMsg);
-            Message inMsg = (Message) inputStream.readObject();
-
-            if (!inMsg.getMsg().equals("incorrect") && inMsg.getType().equals(MessageType.CONNECT)) {
-                username = inMsg.getMsg();
-                return true;
+    private void updateChatWindows() {
+        for (String user : usersOnline) {
+            if (!chatWindows.containsKey(user)) {
+                chatWindows.put(user, FXCollections.observableArrayList());
             }
-        } catch (IOException | ClassNotFoundException e) {
-            close();
         }
-        return false;
     }
 
-    protected void close() {
+    private void handleMsg() {
+        Platform.runLater(() -> chatWindows.get(inMsg.getSender()).add(inMsg.getSender() + ": " + inMsg.getMsg()));
+    }
+
+    void close() {
         try {
+
             if (outputStream != null) {
-                outputStream.writeObject(new Message(MessageType.DISCONNECT, username));
+                outMsg = new Message(MessageType.DISCONNECT, username);
+                outputStream.writeObject(outMsg);
                 outputStream.close();
             }
-            if (inputStream != null)
+
+            if (inputStream != null) {
                 inputStream.close();
-            if (socket != null)
+            }
+
+            if (socket != null) {
                 socket.close();
+            }
 
             Platform.exit();
         } catch (IOException e) {
@@ -128,23 +145,19 @@ public class Client {
         }
     }
 
-    public String getUsersOnline() {
-        return usersOnline;
-    }
-
-    public String getRecipient() {
+    String getRecipient() {
         return recipient;
     }
 
-    public void setRecipient(String recipient) {
+    void setRecipient(String recipient) {
         this.recipient = recipient;
     }
 
-    public String getUsername() {
-        return username;
+    void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setChatController(ChatController chatController) {
+    void setChatController(ChatController chatController) {
         this.chatController = chatController;
     }
 }
