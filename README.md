@@ -1,6 +1,6 @@
 # Secret-Chat
 Simple chat application written in Java.
-You can use it to have more private conversations with your friends as there is no spying from big companies.
+You can use it to have more private conversations with your friends since there is no spying from big companies.
 
 # What I learned
 -using sockets in java\
